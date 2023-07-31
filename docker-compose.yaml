@@ -1,0 +1,88 @@
+version: "3"
+
+services:
+  mysql:
+    image: mysql:8.0.33
+    restart: always
+    environment:
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
+    command: "--default_authentication_plugin=mysql_native_password --max-allowed-packet=1024000000 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+    volumes:
+      - ${MYSQL_DATA_PATH}:/var/lib/mysql
+
+  ketadb:
+    image: ${REPOSITORY}/${KETADB_IMAGE_IMAGE}:${KETADB_IMAGE_TAG}
+    restart: always
+    volumes:
+      - ${KETADB_DATA_PATH}:/usr/share/keta/var
+    environment:
+      node.name: ketadb
+      keta.database.mysql.url: mysql:3306
+      keta.database.mysql.database: ${MYSQL_DATABASE}
+      keta.database.mysql.user: ${MYSQL_USER}
+      keta.database.mysql.password: ${MYSQL_PASSWORD}
+      http.max_content_length: "500mb"
+      network.host: 0.0.0.0
+      keta.scheduler.master.assign.interval: "3"
+      keta.scheduler.worker.fetchtasks.interval: "4"
+      keta.dc.data.trans.path: /api/v1/data
+      keta.cache.expiry.all: 60
+      keta.cache.expiry.auth: 60
+      keta.memory.query.limit.mb: 2048
+      keta.csrf.check.enable: "true"
+      keta.events.expire.interval.seconds: 60
+      keta.environment: local
+
+      keta.auth_disabled.internal_api: "false"
+      keta.app.home: /usr/share/keta/var/app
+      cluster.routing.allocation.disk.watermark.flood_stage: 95%
+      cluster.routing.allocation.disk.watermark.high: 90%
+      KETA_JAVA_OPTS: "${JVM_OPTIONS}"
+      cluster.routing.allocation.disk.watermark.low: 85%
+      keta.transport.dbconnect.encryption.enable: "false"
+      keta.transport.asymmetric.encryption.enable: "false"
+      keta.notice.encryption.enable: "false"
+      keta.static.file.root.path: ./lib/keta-web
+      path.data: /usr/share/keta/var/data
+      path.logs: /usr/share/keta/var/logs
+      keta.matrix.ml.node.urls: keta-ml:5005
+      node.attr.tag: hot   # hot, warm, cold
+
+    ports:
+      - "${KETADB_WEB_PORT}:9200"
+      - "${KETADB_UNICAST_PORT}:9300"
+      - "${KETADB_TANSPORT_PORT}:9400"
+      - "${KETADB_SEARCH_RPC_PORT}:9500"
+
+    depends_on:
+      - mysql
+
+  keta-ml:
+    image: ${REPOSITORY}/${KETA_ML_IMAGE_IMAGE}:${KETA_ML_IMAGE_TAG}
+    platform: linux/amd64
+    restart: always
+    environment:
+      KETAML_LOG_LEVEN: INFO
+      KETAML_LOG_DIR_NAME: "./log"
+      KETAML_LOG_FILE_NAME: "keta-ml.log"
+      KETAML_LOG_MAX_BYTES: "209715200"
+      KETAML_LOG_BACKUP_COUNT: "5"
+      KETAML_FLIGHT_HOST: "0.0.0.0"
+      KETAML_FLIGHT_PORT: "5005"
+      KETAML_MYSQL_HOST: "mysql"
+      KETAML_MYSQL_PORT: "3306"
+      KETAML_MYSQL_USER: ${MYSQL_USER}
+      KETAML_MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      KETAML_MYSQL_DATABASE: ${MYSQL_DATABASE}
+      KETAML_MYSQL_POOL_SIZE: 16
+      KETAML_ALGO_MAX_FIT_SIZE: 1000000
+      KETAML_ALGO_MAX_APPLY_SIZE: 1000000
+      KETAML_MODEL_MAX_MODEL_SIZE: 104857600
+      KETAML_MODEL_LIST_MODELS_BATCH_SIZE: 1024
+
+    depends_on:
+      - ketadb
+

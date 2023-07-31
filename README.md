@@ -1,39 +1,103 @@
-# keta-docker-compose
+# Deployment Instructions
+## Prerequisites
 
-#### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+### For Linux
+1. Install [docker](https://docs.docker.com/engine/install/)
+2. Install [docker-compose](https://docs.docker.com/compose/install/standalone/)
 
-#### 软件架构
-软件架构说明
+### For Docker on Mac/Windows
+1. Install [docker-desktop](https://www.docker.com/products/docker-desktop/)
 
+## Limitations
+1. Requires external network access (If not available, you'll need to use offline images).
+2. This deployment method supports single-node deployment only (but can have multiple nodes on a single machine).
 
-#### 安装教程
+## Installation Steps
+1. Place this directory (docker-compose) in the deployment directory, for example: `${PWD}/docker-compose`.
+3. Execute the installation process:
+   For ease of deployment, we have set up a Makefile in this directory. You can use `make install` to install. Unlike using `docker-compose` directly, the Makefile defines some checking logic to help you verify if the configurations are correct.
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+    a. Modify the configuration:
+    ```bash
+    cd ${PWD}/docker-compose
+    # Use the `sed` command to modify the MySQL password
+    # On Linux systems, modify the MySQL password
+    sed -i 's/MYSQL_PASSWORD=""/MYSQL_PASSWORD="ChangeThisPassword"/g' .env
 
-#### 使用说明
+    # On Mac systems, modify the MySQL password
+    sed -i '' 's/MYSQL_PASSWORD=""/MYSQL_PASSWORD="ChangeThisPassword"/g' .env
+    # Alternatively, you can manually edit the `.env` file to modify the MySQL password and other related configurations.
+    vim .env
+    ```
+    b. Start the installation:
+    ```bash
+    make install
+    ```
+    c. Check the installation result:
+    ```
+    make status
+    # View logs
+    make log ketadb
+    ```
+    d. Uninstall/clean up:
+    ```bash
+    # Stop services
+    make down
+    # Clean up generated data
+    make purge
+    ```
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## Custom Configurations
+In the `.env` file, you can define some configurations that can be modified during deployment.
 
-#### 参与贡献
+1. Use custom storage paths:
+    ```.env
+    ...
+    # Persistence configurations
+    MYSQL_DATA_PATH=./mysql-data
+    KETADB_DATA_PATH=./keta-data
+    ...
+    ```
+2. Customize external access ports:
+    ```.env
+    ...
+    # Web page port
+    KETADB_WEB_PORT=9200
+    # Cluster discovery port (this port needs to be opened for other machines when assembling multiple nodes)
+    KETADB_UNICAST_PORT=9300
+    # keta-agent connection port
+    KETADB_TANSPORT_PORT=9400
+    # SPL search RPC port
+    KETADB_SEARCH_RPC_PORT=9500
+    ...
+    ```
+3. Others:
+    ```env
+        
+    # Docker repository address
+    REPOSITORY=docker.io
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+    # Docker image addresses
+    KETADB_IMAGE_IMAGE=ketaops/ketadb
+    KETA_ML_IMAGE_IMAGE=ketaops/ketadb
 
+    # Docker image tags
+    KETADB_IMAGE_TAG=latest
+    KETA_ML_IMAGE_TAG=latest
 
-#### 特技
+    # JVM OPTIONS
+    JVM_OPTIONS="-Xmx2g -Xms2g"
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+    # MYSQL OPTIONS
+    MYSQL_USER=keta
+    MYSQL_DATABASE=ketadb
+    MYSQL_PASSWORD=""  # This password needs to be set
+    MYSQL_RANDOM_ROOT_PASSWORD="true"
+    ```
+
+## Other Notes
+* In the `mysql` configuration, a random password is generated for the root user of MySQL. You can use the command `docker-compose logs mysql | grep "GENERATED ROOT PASSWORD"` to check it.
+* Configurations for ketadb and keta-ml are injected via environment variables. Please refer to [Parameter Descriptions](*todo: ketadb and ketaml parameter descriptions*).
+* The current deployment method is for single-node deployment and is only recommended for testing and validation. For production deployment, please refer to [k8s Deployment](../helm/Readme.zh.md).
+* Regarding the image repository, you can refer to [Docker Hub](https://hub.docker.com/r/ketaops/ketadb).
+* Currently, keta-ml does not have an arm64 image, so the AMD64 system platform is specified. This should work fine on Mac M1 chip machines. Other ARM architecture machines cannot currently deploy keta-ml. You can remove the `keta-ml` block from the `docker-compose.yml` file for those machines.
