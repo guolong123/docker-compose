@@ -30,43 +30,34 @@
    ```
    b. Start the installation
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
-   c. Wait a moment(about 2~4min) and access the service. Open the following address in your web browser: http://127.0.0.1:9200
+   c. Wait a moment(about 1~4min) and access the service. Open the following address in your web browser: http://127.0.0.1:8080
 
    d. Check the installation result
    ```
-   docker-compose ps
+   docker compose ps
    ```
    e. View service logs
    ```
-   docker-compose logs -f ketadb
+   docker compose logs -f
    ```
    f. Uninstall/clean up
    ```bash
-   # Stop the services
-   docker-compose down
-   # Clean up generated data
-   rm -rf $(source .env && echo $MYSQL_DATA_PATH)
-   rm -rf $(source .env && echo $KETADB_DATA_PATH)
+   # clean the services
+   docker compose down
+   # clean the services and volume
+   docker compose down -v
    ```
 
 ## Custom Configurations
 In the `.env` file, you can define some configurations that can be modified during deployment.
 
-1. Use custom storage paths:
-    ```.env
-    ...
-    # Persistence configurations
-    MYSQL_DATA_PATH=./mysql-data
-    KETADB_DATA_PATH=./keta-data
-    ...
-    ```
-2. Customize external access ports:
+1. Customize external access ports:
     ```.env
     ...
     # Web page port
-    KETADB_WEB_PORT=9200
+    KETADB_WEB_PORT=8080
     # Cluster discovery port (this port needs to be opened for other machines when assembling multiple nodes)
     KETADB_UNICAST_PORT=9300
     # keta-agent connection port
@@ -75,7 +66,7 @@ In the `.env` file, you can define some configurations that can be modified duri
     KETADB_SEARCH_RPC_PORT=9500
     ...
     ```
-3. Others:
+2. Others:
     ```env
         
     # Docker repository address

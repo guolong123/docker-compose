@@ -12,14 +12,14 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
     command: "--skip-log-bin --default_authentication_plugin=mysql_native_password --max-allowed-packet=1024000000 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
     volumes:
-      - ${MYSQL_DATA_PATH}:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
 
   ketadb:
     container_name: keta-db
     image: ${REPOSITORY}/${KETADB_IMAGE_IMAGE}:${KETADB_IMAGE_TAG}
     restart: always
     volumes:
-      - ${KETADB_DATA_PATH}:/usr/share/keta/var
+      - ketadb_data:/usr/share/keta/var
     environment:
       node.name: ketadb
       keta.database.mysql.url: mysql:3306
@@ -88,3 +88,6 @@ services:
 
     depends_on:
       - ketadb
+volumes:
+  ketadb_data:
+  mysql_data:

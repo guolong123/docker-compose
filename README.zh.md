@@ -30,43 +30,35 @@
     ```
     b. 开始安装
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
-    c. 等待片刻(大约2-4分钟)，访问服务，在你的 web 浏览器中打开地址：http://127.0.0.1:9200
+    c. 等待片刻(大约1-4分钟)，访问服务，在你的 web 浏览器中打开地址：http://127.0.0.1:8080
     
     d. 检查安装结果
     ```
-    docker-compose ps
+    docker compose ps
     ```
     e. 查看服务日志
     ```
-    docker-compose logs -f ketadb
+    docker compose logs -f
     ```
     f. 卸载/清理
     ```bash
     # 停止服务
-    docker-compose down
-    # 清理产生的数据
-    rm -rf $(source .env && echo $MYSQL_DATA_PATH)
-    rm -rf $(source .env && echo $KETADB_DATA_PATH)
+    docker compose down
+    # 停止服务, 清理产生的数据
+    docker compose down -v
+
     ```
 
 ## 自定义配置
 在`.env`文件中定义了部署可以修改的一些配置
 
-1. 使用自定义存储路径
-    ```.env
-    ...
-    # 持久化配置
-    MYSQL_DATA_PATH=./mysql-data
-    KETADB_DATA_PATH=./keta-data
-    ...
-    ```
-2. 自定义外部访问端口
+1. 自定义外部访问端口
     ```.env
     ...
     # web页面端口
-    KETADB_WEB_PORT=9200
+    KETADB_WEB_PORT=8080
     # 集群发现端口，当需要组装多个节点时这个端口需要开放给其它机器
     KETADB_UNICAST_PORT=9300
     # keta-agent连接端口
@@ -75,7 +67,7 @@
     KETADB_SEARCH_RPC_PORT=9500
     ...
     ```
-3. 其它
+2. 其它
     ```env
         
     # docker 仓库地址
