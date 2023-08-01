@@ -13,39 +13,43 @@
 2. This deployment method supports single-node deployment only (but can have multiple nodes on a single machine).
 
 ## Installation Steps
-1. Place this directory (docker-compose) in the deployment directory, for example: `${PWD}/docker-compose`.
-3. Execute the installation process:
-   For ease of deployment, we have set up a Makefile in this directory. You can use `make install` to install. Unlike using `docker-compose` directly, the Makefile defines some checking logic to help you verify if the configurations are correct.
+1. Place this directory (docker-compose) under the deployment directory, for example: `${PWD}/docker-compose`.
+2. Perform the installation:
+   
+   a. Modify MySQL password
+   ```bash
+   cd ~/docker-compose
+   # Use the `sed` command to modify the MySQL password
+   # For Linux systems:
+   sed -i 's/MYSQL_PASSWORD=""/MYSQL_PASSWORD="ChangeThisPassword"/g' .env
 
-    a. Modify the configuration:
-    ```bash
-    cd ${PWD}/docker-compose
-    # Use the `sed` command to modify the MySQL password
-    # On Linux systems, modify the MySQL password
-    sed -i 's/MYSQL_PASSWORD=""/MYSQL_PASSWORD="ChangeThisPassword"/g' .env
+   # For Mac systems:
+   sed -i '' 's/MYSQL_PASSWORD=""/MYSQL_PASSWORD="ChangeThisPassword"/g' .env
+   # You can also manually edit the `.env` file to modify the MySQL password and other related configurations
+   vim .env
+   ```
+   b. Start the installation
+   ```bash
+   docker-compose up -d
+   ```
+   c. Wait a moment and access the service. Open the following address in your web browser: http://127.0.0.1:9200
 
-    # On Mac systems, modify the MySQL password
-    sed -i '' 's/MYSQL_PASSWORD=""/MYSQL_PASSWORD="ChangeThisPassword"/g' .env
-    # Alternatively, you can manually edit the `.env` file to modify the MySQL password and other related configurations.
-    vim .env
-    ```
-    b. Start the installation:
-    ```bash
-    make install
-    ```
-    c. Check the installation result:
-    ```
-    make status
-    # View logs
-    make log ketadb
-    ```
-    d. Uninstall/clean up:
-    ```bash
-    # Stop services
-    make down
-    # Clean up generated data
-    make purge
-    ```
+   d. Check the installation result
+   ```
+   docker-compose ps
+   ```
+   e. View service logs
+   ```
+   docker-compose logs -f ketadb
+   ```
+   f. Uninstall/clean up
+   ```bash
+   # Stop the services
+   docker-compose down
+   # Clean up generated data
+   rm -rf $(source .env && echo $MYSQL_DATA_PATH)
+   rm -rf $(source .env && echo $KETADB_DATA_PATH)
+   ```
 
 ## Custom Configurations
 In the `.env` file, you can define some configurations that can be modified during deployment.

@@ -13,11 +13,10 @@
 2. 此方式仅支持单机部署（可单机多节点）
 
 ## 安装步骤
-1. 将此目录（docker-compose）放到部署目录下，例如：～/docker-compose
+1. 将此目录（docker-compose）放到部署目录下，例如：`${PWD}/docker-compose`
 3. 执行安装
-    为了方便部署，我们在此目录下设定了一个Makefile，您可以使用`make install`来安装，与直接使用`docker-compose`不同的是，makefile中定义了一些检查逻辑，可以帮助您检查配置是否正确。
-
-    a. 修改配置
+    
+    a. 修改mysql密码
     ```bash
     cd ~/docker-compose
     # 使用 `sed` 命令来修改 MySQL 密码
@@ -31,20 +30,25 @@
     ```
     b. 开始安装
     ```bash
-    make install
+    docker-compose up -d
     ```
-    c. 检查安装结果
+    c. 等待片刻，访问服务，在你的 web 浏览器中打开地址：http://127.0.0.1:9200
+    
+    d. 检查安装结果
     ```
-    make status
-    # 查看日志
-    make log ketadb
+    docker-compose ps
     ```
-    d. 卸载/清理
+    e. 查看服务日志
+    ```
+    docker-compose logs -f ketadb
+    ```
+    f. 卸载/清理
     ```bash
     # 停止服务
-    make down
+    docker-compose down
     # 清理产生的数据
-    make purge
+    rm -rf $(source .env && echo $MYSQL_DATA_PATH)
+    rm -rf $(source .env && echo $KETADB_DATA_PATH)
     ```
 
 ## 自定义配置
