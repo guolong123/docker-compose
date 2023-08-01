@@ -32,7 +32,7 @@
    ```bash
    docker-compose up -d
    ```
-   c. Wait a moment and access the service. Open the following address in your web browser: http://127.0.0.1:9200
+   c. Wait a moment(about 2~4min) and access the service. Open the following address in your web browser: http://127.0.0.1:9200
 
    d. Check the installation result
    ```

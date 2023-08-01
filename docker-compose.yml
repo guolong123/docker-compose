@@ -1,7 +1,8 @@
 version: "3"
-
+name: ketaops
 services:
   mysql:
+    container_name: keta-mysql
     image: mysql:8.0.33
     restart: always
     environment:
@@ -9,11 +10,12 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
-    command: "--default_authentication_plugin=mysql_native_password --max-allowed-packet=1024000000 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+    command: "--skip-log-bin --default_authentication_plugin=mysql_native_password --max-allowed-packet=1024000000 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
     volumes:
       - ${MYSQL_DATA_PATH}:/var/lib/mysql
 
   ketadb:
+    container_name: keta-db
     image: ${REPOSITORY}/${KETADB_IMAGE_IMAGE}:${KETADB_IMAGE_TAG}
     restart: always
     volumes:
@@ -61,6 +63,7 @@ services:
       - mysql
 
   keta-ml:
+    container_name: keta-ml
     image: ${REPOSITORY}/${KETA_ML_IMAGE_IMAGE}:${KETA_ML_IMAGE_TAG}
     platform: linux/amd64
     restart: always
@@ -85,4 +88,3 @@ services:
 
     depends_on:
       - ketadb
-
